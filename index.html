@@ -3,122 +3,198 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hesitation Engine - Live Demo</title>
+    <title>E-Commerce Hesitation Engine Demo</title>
     <style>
         body {
             font-family: system-ui, -apple-system, sans-serif;
-            background-color: #121212;
+            background-color: #0f0f12;
             color: #ffffff;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            height: 100vh;
+            min-height: 100vh;
             margin: 0;
-            overflow-x: hidden;
-        }
-
-        .container {
-            text-align: center;
-            background: #1e1e1e;
-            padding: 40px;
-            border-radius: 16px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-            width: 90%;
-            max-width: 400px;
+            padding: 20px;
             box-sizing: border-box;
         }
 
-        h1 { font-size: 24px; margin-bottom: 10px; color: #00ffcc; }
-        .price { font-size: 32px; font-weight: bold; margin: 20px 0; color: #ffdd57; }
-        
-        #buy-now {
-            background-color: #ff4757;
-            color: white;
-            border: none;
-            padding: 15px 32px;
-            font-size: 18px;
-            font-weight: bold;
-            border-radius: 8px;
-            cursor: pointer;
+        /* Real Product Card Styling */
+        .product-card {
+            background: #18181c;
+            border-radius: 24px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.6);
             width: 100%;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(255, 71, 87, 0.4);
+            max-width: 380px;
+            overflow: hidden;
+            border: 1px solid #26262b;
+            transition: transform 0.3s ease;
         }
 
-        .stats-box {
-            margin-top: 30px;
-            border-top: 1px solid #333;
-            padding-top: 20px;
-            text-align: left;
+        .product-image-placeholder {
+            background: linear-gradient(135deg, #2b2b36, #1e1e24);
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            position: relative;
         }
 
-        .stats-title {
-            font-size: 14px;
-            color: #aaa;
+        .product-image-placeholder::after {
+            content: '🎧';
+        }
+
+        .product-info {
+            padding: 25px;
+        }
+
+        .tag {
+            background: rgba(0, 255, 204, 0.1);
+            color: #00ffcc;
+            padding: 4px 10px;
+            border-radius: 100px;
+            font-size: 11px;
+            font-weight: bold;
             text-transform: uppercase;
             letter-spacing: 1px;
-            margin-bottom: 15px;
-            font-weight: bold;
         }
 
-        .stat-row {
+        h1 { 
+            font-size: 22px; 
+            margin: 12px 0 6px 0; 
+            color: #fff; 
+        }
+
+        .rating {
+            color: #ffdd57;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .description {
+            color: #9ca3af;
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 20px;
+        }
+
+        .price-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .price { 
+            font-size: 28px; 
+            font-weight: 800; 
+            color: #fff; 
+        }
+
+        #buy-now {
+            background: #ff4757;
+            color: white;
+            border: none;
+            padding: 16px;
+            font-size: 16px;
+            font-weight: 700;
+            border-radius: 12px;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 20px rgba(255, 71, 87, 0.3);
+            letter-spacing: 0.5px;
+        }
+
+        /* Live Dashboard Overlay */
+        .dashboard {
+            margin-top: 25px;
+            width: 100%;
+            max-width: 380px;
+            background: rgba(24, 24, 28, 0.7);
+            border-radius: 16px;
+            padding: 15px 20px;
+            border: 1px dashed #333;
+            box-sizing: border-box;
+        }
+
+        .dash-title {
+            font-size: 12px;
+            color: #6b7280;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        .stat-line {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 10px;
-            font-size: 15px;
+            font-size: 14px;
+            margin-bottom: 6px;
+            color: #d1d5db;
         }
 
-        .stat-value { font-weight: bold; color: #00ffcc; }
-        #behavior-status { color: #ff4757; font-weight: bold; }
+        .stat-line:last-child { margin-bottom: 0; }
+        .val { font-weight: 600; color: #00ffcc; }
+        #behavior-status { font-weight: 700; color: #ff4757; }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>Sample Product</h1>
-        <div class="price" id="product-price">$350</div>
-        <button id="buy-now">BUY NOW</button>
+    <!-- Real Product Card View -->
+    <div class="product-card">
+        <div class="product-image-placeholder"></div>
+        <div class="product-info">
+            <span class="tag">New Release</span>
+            <h1>Quantum Sound X7</h1>
+            <div class="rating">★★★★★ <span style="color:#6b7280; font-size:12px;">(48 reviews)</span></div>
+            <p class="description">Premium wireless gaming headset with active noise cancelling, 60-hour battery life, and spatial audio mechanics.</p>
+            
+            <div class="price-row">
+                <div class="price" id="product-price">$350</div>
+            </div>
+            
+            <button id="buy-now">ADD TO CART</button>
+        </div>
+    </div>
 
-        <div class="stats-box">
-            <div class="stats-title">Live Engine Metrics:</div>
-            <div class="stat-row">
-                <span>Hesitation Score (0-100):</span>
-                <span class="stat-value" id="score-val">0</span>
-            </div>
-            <div class="stat-row">
-                <span>Confidence Level:</span>
-                <span class="stat-value" id="confidence-val">0.00</span>
-            </div>
-            <div class="stat-row">
-                <span>Psychological State:</span>
-                <span id="behavior-status">Analyzing...</span>
-            </div>
+    <!-- Algorithm Monitor -->
+    <div class="dashboard">
+        <div class="dash-title">Engine Real-Time Telemetry</div>
+        <div class="stat-line">
+            <span>Hesitation Index (0-100):</span>
+            <span class="val" id="score-val">0</span>
+        </div>
+        <div class="stat-line">
+            <span>Data Confidence:</span>
+            <span class="val" id="confidence-val">0.00</span>
+        </div>
+        <div class="stat-line">
+            <span>User State:</span>
+            <span id="behavior-status">Analyzing Physics...</span>
         </div>
     </div>
 
     <script type="module">
-        // --- HESITATION ENGINE CODE (Desktop + Mobile Support) ---
-        class HesitationEngine {
+        class AdvancedHesitationEngine {
             constructor() {
                 this.score = 0;
                 this.confidence = 0.0;
-                this.status = "Analyzing...";
+                this.status = "Analyzing Physics...";
                 
-                // Physics tracking variables
+                this.startTime = Date.now();
                 this.lastX = null;
                 this.lastY = null;
                 this.lastTime = Date.now();
                 this.lastScrollY = window.scrollY;
-                this.scrollStops = 0;
                 this.isMobile = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
                 
                 this.listeners = [];
             }
 
-            onUpdate(callback) {
-                this.listeners.push(callback);
-            }
+            onUpdate(callback) { this.listeners.push(callback); }
 
             triggerUpdate() {
                 this.listeners.forEach(cb => cb({
@@ -130,42 +206,41 @@
 
             init() {
                 if (this.isMobile) {
-                    // Mobile listeners: Scroll tracking + Touch hold mechanics
                     window.addEventListener('scroll', () => this.handleMobileScroll());
                     window.addEventListener('touchstart', () => this.handleTouchStart());
                     window.addEventListener('touchend', () => this.handleTouchEnd());
                 } else {
-                    // Desktop listener: Mouse physics
                     window.addEventListener('mousemove', (e) => this.handleDesktopMouse(e));
                 }
-
-                // Global idle checker (Detects device distraction or frozen attention)
                 setInterval(() => this.checkIdleState(), 1000);
+            }
+
+            // Time Guard: Prevents immediate dynamic offers within first 4 seconds of landing
+            isTimeGuardActive() {
+                return (Date.now() - this.startTime) < 4000;
             }
 
             handleDesktopMouse(e) {
                 const now = Date.now();
                 const dt = now - this.lastTime;
-                if (dt < 20) return; // Throttling for performance
+                if (dt < 25) return;
 
                 if (this.lastX !== null && this.lastY !== null) {
                     const dx = e.clientX - this.lastX;
                     const dy = e.clientY - this.lastY;
                     const distance = Math.sqrt(dx*dx + dy*dy);
-                    const speed = distance / dt; // pixels per ms
+                    const speed = distance / dt;
 
-                    // Detect Micro-jitters / erratic shaking (High friction movement)
-                    if (speed > 0.05 && speed < 0.4 && distance < 15) {
-                        this.score = Math.min(100, this.score + 4);
-                        this.confidence = Math.min(1.0, this.confidence + 0.08);
-                    } 
-                    // Detect High-speed Intentional linear motion (Target lock)
-                    else if (speed > 1.2) {
-                        this.score = Math.max(0, this.score - 8);
+                    if (speed > 0.03 && speed < 0.35 && distance < 12) {
+                        // Slowed pacing / micro-adjustments
+                        this.score = Math.min(100, this.score + 3);
                         this.confidence = Math.min(1.0, this.confidence + 0.05);
+                    } else if (speed > 1.5) {
+                        // Resolute, fast movement clears hesitation matrix
+                        this.score = Math.max(0, this.score - 10);
+                        this.confidence = Math.min(1.0, this.confidence + 0.03);
                     }
                 }
-
                 this.lastX = e.clientX;
                 this.lastY = e.clientY;
                 this.lastTime = now;
@@ -181,14 +256,19 @@
                 if (dt > 0) {
                     const scrollSpeed = dScroll / dt;
 
-                    // Micro-scrolling behavior: slow, choppy scrolling back and forth while reading/deciding
-                    if (scrollSpeed > 0.02 && scrollSpeed < 0.3) {
-                        this.score = Math.min(100, this.score + 3);
-                        this.confidence = Math.min(1.0, this.confidence + 0.05);
-                    } else if (scrollSpeed > 1.5) {
-                        // Rapid skimming / fast scroll away
-                        this.score = Math.max(0, this.score - 5);
-                        this.confidence = Math.min(1.0, this.confidence + 0.02);
+                    if (this.isTimeGuardActive()) {
+                        // If they just opened the page and scrolled, damp down the score additions significantly
+                        this.lastScrollY = currentScrollY;
+                        this.lastTime = now;
+                        return;
+                    }
+
+                    // Strict Mobile Calibration: Captures micro-stalls and reading rhythms
+                    if (scrollSpeed > 0.01 && scrollSpeed < 0.25) {
+                        this.score = Math.min(100, this.score + 2.5); // Smoother, slower build
+                        this.confidence = Math.min(1.0, this.confidence + 0.04);
+                    } else if (scrollSpeed > 1.8) {
+                        this.score = Math.max(0, this.score - 12);
                     }
                 }
 
@@ -197,53 +277,46 @@
                 this.updatePsychState();
             }
 
-            handleTouchStart() {
-                this.touchStartTime = Date.now();
-            }
+            handleTouchStart() { this.touchStartTime = Date.now(); }
 
             handleTouchEnd() {
+                if (this.isTimeGuardActive()) return;
                 const duration = Date.now() - this.touchStartTime;
-                // Long press hesitation: Holding finger down on screen without acting
-                if (duration > 600 && duration < 2500) {
-                    this.score = Math.min(100, this.score + 15);
-                    this.confidence = Math.min(1.0, this.confidence + 0.15);
+                // Persistent touch hold down signifies reading friction
+                if (duration > 800 && duration < 3000) {
+                    this.score = Math.min(100, this.score + 10);
+                    this.confidence = Math.min(1.0, this.confidence + 0.10);
                     this.updatePsychState();
                 }
             }
 
             checkIdleState() {
                 const elapsed = Date.now() - this.lastTime;
-                // User stopped moving completely
-                if (elapsed > 1500) {
-                    if (this.score > 30) {
-                        // Attention froze while already hesitating
-                        this.score = Math.min(100, this.score + 2);
-                        this.confidence = Math.max(0.0, this.confidence - 0.04);
+                if (elapsed > 2000) {
+                    if (this.isTimeGuardActive()) return;
+                    
+                    if (this.score > 40) {
+                        this.score = Math.min(100, this.score + 1.5);
+                        this.confidence = Math.max(0.0, this.confidence - 0.02);
                     } else {
-                        // Distracted away from device
-                        this.score = Math.min(100, this.score + 1);
-                        this.confidence = Math.max(0.0, this.confidence - 0.05);
+                        this.score = Math.min(50, this.score + 0.5);
+                        this.confidence = Math.max(0.0, this.confidence - 0.03);
                     }
                     this.updatePsychState();
                 }
             }
 
             updatePsychState() {
-                if (this.score < 25) {
-                    this.status = "Decisive (Ready to Buy)";
-                } else if (this.score >= 25 && this.score < 65) {
-                    this.status = "Browsing / Comparing";
-                } else if (this.score >= 65 && this.score < 85) {
-                    this.status = "Highly Hesitant (Price Shock)";
-                } else {
-                    this.status = "Stalled / Leaving Cart";
-                }
+                if (this.score < 30) this.status = "Intentional / Evaluating";
+                else if (this.score >= 30 && this.score < 65) this.status = "Deep Reading / Browsing";
+                else if (this.score >= 65 && this.score < 85) this.status = "Hesitant (Price Analysis)";
+                else this.status = "High Friction / Leaving Cart";
                 this.triggerUpdate();
             }
         }
 
-        // --- DOM UI APPLICATION INTERACTION ---
-        const engine = new HesitationEngine();
+        // UI Binding Implementation
+        const engine = new AdvancedHesitationEngine();
         engine.init();
 
         const btn = document.querySelector('#buy-now');
@@ -252,33 +325,33 @@
         const confidenceDisplay = document.querySelector('#confidence-val');
         const statusDisplay = document.querySelector('#behavior-status');
 
-        let dynamicDiscountApplied = false;
+        let promoTriggered = false;
 
         engine.onUpdate((metrics) => {
-            // Update the interface stats
             scoreDisplay.textContent = metrics.score;
             confidenceDisplay.textContent = metrics.confidence.toFixed(2);
             statusDisplay.textContent = metrics.status;
 
-            // Change UI colors dynamically based on psychological severity
-            if (metrics.score < 25) {
-                statusDisplay.style.color = "#00ffcc"; // Green/Decisive
-                if (!dynamicDiscountApplied) {
-                    btn.style.backgroundColor = "#ff4757";
-                    btn.textContent = "BUY NOW";
-                    priceTag.textContent = "$350";
+            if (metrics.score < 30) {
+                statusDisplay.style.color = "#00ffcc";
+                if (!promoTriggered) {
+                    btn.style.background = "#ff4757";
+                    btn.style.boxShadow = "0 4px 20px rgba(255, 71, 87, 0.3)";
+                    btn.textContent = "ADD TO CART";
+                    priceTag.innerHTML = "$350";
                 }
-            } else if (metrics.score >= 25 && metrics.score < 65) {
-                statusDisplay.style.color = "#ffdd57"; // Yellow/Browsing
+            } else if (metrics.score >= 30 && metrics.score < 65) {
+                statusDisplay.style.color = "#ffdd57";
             } else {
-                statusDisplay.style.color = "#ff4757"; // Red/Hesitant
+                statusDisplay.style.color = "#ff4757";
                 
-                // Real-time Conversion Hook: If user is highly hesitant and confidence is solid, change price
-                if (metrics.score >= 70 && metrics.confidence >= 0.50 && !dynamicDiscountApplied) {
-                    dynamicDiscountApplied = true;
-                    btn.style.backgroundColor = "#2ed573"; // Dynamic green offer hook
-                    btn.textContent = "ACTIVATE 15% OFF";
-                    priceTag.innerHTML = `<span style="text-decoration: line-through; color: #888; font-size: 20px;">$350</span> $297`;
+                // Optimized Conversion Window: Requires high hesitation, solid confidence, and minimum time threshold
+                if (metrics.score >= 75 && metrics.confidence >= 0.45 && !promoTriggered && !engine.isTimeGuardActive()) {
+                    promoTriggered = true;
+                    btn.style.background = "#2ed573";
+                    btn.style.boxShadow = "0 4px 20px rgba(46, 213, 115, 0.4)";
+                    btn.textContent = "CLAIM 15% HESITATION DISCOUNT";
+                    priceTag.innerHTML = `<span style="text-decoration: line-through; color: #6b7280; font-size: 18px; font-weight:400; margin-right:8px;">$350</span>$297`;
                 }
             }
         });
