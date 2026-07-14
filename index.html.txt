@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>מעבדת בדיקה - מנוע היסוסים</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            text-align: center;
+            background: #1e1e1e;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+            width: 400px;
+        }
+        h1 { font-size: 24px; margin-bottom: 10px; color: #00ffcc; }
+        .price { font-size: 32px; font-weight: bold; margin: 20px 0; color: #ffdd57; }
+        
+        /* כפתור הרכישה שנעקוב אחריו */
+        #buy-now {
+            background-color: #ff4757;
+            color: white;
+            border: none;
+            padding: 16px 32px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        
+        /* לוח התוצאות שמציג מה האלגוריתם חושב בלייב */
+        .dashboard {
+            margin-top: 30px;
+            border-top: 1px solid #333;
+            padding-top: 20px;
+            text-align: right;
+        }
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 8px 0;
+            font-size: 16px;
+        }
+        .stat-value { font-weight: bold; color: #00ffcc; }
+        #friction-type { color: #ff4757; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>מוצר לדוגמה</h1>
+        <div class="product-price class">מחיר: 350$</div>
+        
+        <button id="buy-now">קנה עכשיו</button>
+
+        <div class="dashboard">
+            <h3>נתוני אלגוריתם (בזמן אמת):</h3>
+            <div class="stat-row">
+                <span>מדד היסוס (0-100):</span>
+                <span id="score-val" class="stat-value">0</span>
+            </div>
+            <div class="stat-row">
+                <span>רמת ודאות מידע (Confidence):</span>
+                <span id="conf-val" class="stat-value">0.0</span>
+            </div>
+            <div class="stat-row">
+                <span>סיווג פסיכולוגי:</span>
+                <span id="friction-type" class="stat-value">מחכה למידע...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- חיבור המנוע והפעלתו -->
+    <script type="module">
+        import HesitationEngine from './HesitationEngine.js';
+
+        const btn = document.querySelector('#buy-now');
+        
+        // הגדרת האלגוריתם על הכפתור
+        const engine = new HesitationEngine(btn, {
+            exposeDiagnostics: true,
+            onUpdate: (state) => {
+                // עדכון האלמנטים על המסך בכל פעם שהאלגוריתם פולט חישוב חדש
+                document.querySelector('#score-val').textContent = state.hesitation_score;
+                document.querySelector('#conf-val').textContent = state.confidence_level;
+                
+                // תרגום הסיווגים לעברית פשוטה בשביל הבדיקה
+                let typeHebrew = "";
+                switch(state.predicted_friction_type) {
+                    case 'high_intent': typeHebrew = "בדרך לקנייה (בטוח בעצמו)"; break;
+                    case 'price_shock': typeHebrew = "מתלבט לגבי המחיר"; break;
+                    case 'security_distrust': typeHebrew = "חשדנות / חוסר ביטחון באתר"; break;
+                    case 'device_distraction': typeHebrew = "הסחת דעת (עזב את העכבר)"; break;
+                    default: typeHebrew = state.predicted_friction_type;
+                }
+                document.querySelector('#friction-type').textContent = typeHebrew;
+
+                // אקשן אוטומטי לדוגמה: אם המשתמש ממש מהסס לגבי המחיר, נשנה את הכפתור
+                if (state.hesitation_score > 70 && state.predicted_friction_type === 'price_shock') {
+                    btn.style.backgroundColor = '#2ed573';
+                    btn.textContent = 'קנה עכשיו — קבל 3 תשלומים ללא ריבית!';
+                }
+            }
+        });
+
+        // הפעלת המנוע
+        engine.start();
+    </script>
+</body>
+</html>
