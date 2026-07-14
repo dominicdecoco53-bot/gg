@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="he" dir="rtl">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>מעבדת בדיקה - מנוע היסוסים</title>
+    <title>Hesitation Engine - Live Demo</title>
     <style>
         body {
             font-family: system-ui, -apple-system, sans-serif;
@@ -15,109 +15,273 @@
             justify-content: center;
             height: 100vh;
             margin: 0;
+            overflow-x: hidden;
         }
+
         .container {
             text-align: center;
             background: #1e1e1e;
             padding: 40px;
             border-radius: 16px;
             box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-            width: 400px;
+            width: 90%;
+            max-width: 400px;
+            box-sizing: border-box;
         }
+
         h1 { font-size: 24px; margin-bottom: 10px; color: #00ffcc; }
         .price { font-size: 32px; font-weight: bold; margin: 20px 0; color: #ffdd57; }
         
-        /* כפתור הרכישה שנעקוב אחריו */
         #buy-now {
             background-color: #ff4757;
             color: white;
             border: none;
-            padding: 16px 32px;
+            padding: 15px 32px;
             font-size: 18px;
             font-weight: bold;
             border-radius: 8px;
             cursor: pointer;
-            transition: all 0.3s ease;
             width: 100%;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(255, 71, 87, 0.4);
         }
-        
-        /* לוח התוצאות שמציג מה האלגוריתם חושב בלייב */
-        .dashboard {
+
+        .stats-box {
             margin-top: 30px;
             border-top: 1px solid #333;
             padding-top: 20px;
-            text-align: right;
+            text-align: left;
         }
+
+        .stats-title {
+            font-size: 14px;
+            color: #aaa;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
         .stat-row {
             display: flex;
             justify-content: space-between;
-            margin: 8px 0;
-            font-size: 16px;
+            margin-bottom: 10px;
+            font-size: 15px;
         }
+
         .stat-value { font-weight: bold; color: #00ffcc; }
-        #friction-type { color: #ff4757; }
+        #behavior-status { color: #ff4757; font-weight: bold; }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>מוצר לדוגמה</h1>
-        <div class="product-price class">מחיר: 350$</div>
-        
-        <button id="buy-now">קנה עכשיו</button>
+        <h1>Sample Product</h1>
+        <div class="price" id="product-price">$350</div>
+        <button id="buy-now">BUY NOW</button>
 
-        <div class="dashboard">
-            <h3>נתוני אלגוריתם (בזמן אמת):</h3>
+        <div class="stats-box">
+            <div class="stats-title">Live Engine Metrics:</div>
             <div class="stat-row">
-                <span>מדד היסוס (0-100):</span>
-                <span id="score-val" class="stat-value">0</span>
+                <span>Hesitation Score (0-100):</span>
+                <span class="stat-value" id="score-val">0</span>
             </div>
             <div class="stat-row">
-                <span>רמת ודאות מידע (Confidence):</span>
-                <span id="conf-val" class="stat-value">0.0</span>
+                <span>Confidence Level:</span>
+                <span class="stat-value" id="confidence-val">0.00</span>
             </div>
             <div class="stat-row">
-                <span>סיווג פסיכולוגי:</span>
-                <span id="friction-type" class="stat-value">מחכה למידע...</span>
+                <span>Psychological State:</span>
+                <span id="behavior-status">Analyzing...</span>
             </div>
         </div>
     </div>
 
-    <!-- חיבור המנוע והפעלתו -->
     <script type="module">
-        import HesitationEngine from './HesitationEngine.js';
+        // --- HESITATION ENGINE CODE (Desktop + Mobile Support) ---
+        class HesitationEngine {
+            constructor() {
+                this.score = 0;
+                this.confidence = 0.0;
+                this.status = "Analyzing...";
+                
+                // Physics tracking variables
+                this.lastX = null;
+                this.lastY = null;
+                this.lastTime = Date.now();
+                this.lastScrollY = window.scrollY;
+                this.scrollStops = 0;
+                this.isMobile = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+                
+                this.listeners = [];
+            }
+
+            onUpdate(callback) {
+                this.listeners.push(callback);
+            }
+
+            triggerUpdate() {
+                this.listeners.forEach(cb => cb({
+                    score: Math.round(this.score),
+                    confidence: parseFloat(this.confidence.toFixed(2)),
+                    status: this.status
+                }));
+            }
+
+            init() {
+                if (this.isMobile) {
+                    // Mobile listeners: Scroll tracking + Touch hold mechanics
+                    window.addEventListener('scroll', () => this.handleMobileScroll());
+                    window.addEventListener('touchstart', () => this.handleTouchStart());
+                    window.addEventListener('touchend', () => this.handleTouchEnd());
+                } else {
+                    // Desktop listener: Mouse physics
+                    window.addEventListener('mousemove', (e) => this.handleDesktopMouse(e));
+                }
+
+                // Global idle checker (Detects device distraction or frozen attention)
+                setInterval(() => this.checkIdleState(), 1000);
+            }
+
+            handleDesktopMouse(e) {
+                const now = Date.now();
+                const dt = now - this.lastTime;
+                if (dt < 20) return; // Throttling for performance
+
+                if (this.lastX !== null && this.lastY !== null) {
+                    const dx = e.clientX - this.lastX;
+                    const dy = e.clientY - this.lastY;
+                    const distance = Math.sqrt(dx*dx + dy*dy);
+                    const speed = distance / dt; // pixels per ms
+
+                    // Detect Micro-jitters / erratic shaking (High friction movement)
+                    if (speed > 0.05 && speed < 0.4 && distance < 15) {
+                        this.score = Math.min(100, this.score + 4);
+                        this.confidence = Math.min(1.0, this.confidence + 0.08);
+                    } 
+                    // Detect High-speed Intentional linear motion (Target lock)
+                    else if (speed > 1.2) {
+                        this.score = Math.max(0, this.score - 8);
+                        this.confidence = Math.min(1.0, this.confidence + 0.05);
+                    }
+                }
+
+                this.lastX = e.clientX;
+                this.lastY = e.clientY;
+                this.lastTime = now;
+                this.updatePsychState();
+            }
+
+            handleMobileScroll() {
+                const now = Date.now();
+                const currentScrollY = window.scrollY;
+                const dScroll = Math.abs(currentScrollY - this.lastScrollY);
+                const dt = now - this.lastTime;
+
+                if (dt > 0) {
+                    const scrollSpeed = dScroll / dt;
+
+                    // Micro-scrolling behavior: slow, choppy scrolling back and forth while reading/deciding
+                    if (scrollSpeed > 0.02 && scrollSpeed < 0.3) {
+                        this.score = Math.min(100, this.score + 3);
+                        this.confidence = Math.min(1.0, this.confidence + 0.05);
+                    } else if (scrollSpeed > 1.5) {
+                        // Rapid skimming / fast scroll away
+                        this.score = Math.max(0, this.score - 5);
+                        this.confidence = Math.min(1.0, this.confidence + 0.02);
+                    }
+                }
+
+                this.lastScrollY = currentScrollY;
+                this.lastTime = now;
+                this.updatePsychState();
+            }
+
+            handleTouchStart() {
+                this.touchStartTime = Date.now();
+            }
+
+            handleTouchEnd() {
+                const duration = Date.now() - this.touchStartTime;
+                // Long press hesitation: Holding finger down on screen without acting
+                if (duration > 600 && duration < 2500) {
+                    this.score = Math.min(100, this.score + 15);
+                    this.confidence = Math.min(1.0, this.confidence + 0.15);
+                    this.updatePsychState();
+                }
+            }
+
+            checkIdleState() {
+                const elapsed = Date.now() - this.lastTime;
+                // User stopped moving completely
+                if (elapsed > 1500) {
+                    if (this.score > 30) {
+                        // Attention froze while already hesitating
+                        this.score = Math.min(100, this.score + 2);
+                        this.confidence = Math.max(0.0, this.confidence - 0.04);
+                    } else {
+                        // Distracted away from device
+                        this.score = Math.min(100, this.score + 1);
+                        this.confidence = Math.max(0.0, this.confidence - 0.05);
+                    }
+                    this.updatePsychState();
+                }
+            }
+
+            updatePsychState() {
+                if (this.score < 25) {
+                    this.status = "Decisive (Ready to Buy)";
+                } else if (this.score >= 25 && this.score < 65) {
+                    this.status = "Browsing / Comparing";
+                } else if (this.score >= 65 && this.score < 85) {
+                    this.status = "Highly Hesitant (Price Shock)";
+                } else {
+                    this.status = "Stalled / Leaving Cart";
+                }
+                this.triggerUpdate();
+            }
+        }
+
+        // --- DOM UI APPLICATION INTERACTION ---
+        const engine = new HesitationEngine();
+        engine.init();
 
         const btn = document.querySelector('#buy-now');
-        
-        // הגדרת האלגוריתם על הכפתור
-        const engine = new HesitationEngine(btn, {
-            exposeDiagnostics: true,
-            onUpdate: (state) => {
-                // עדכון האלמנטים על המסך בכל פעם שהאלגוריתם פולט חישוב חדש
-                document.querySelector('#score-val').textContent = state.hesitation_score;
-                document.querySelector('#conf-val').textContent = state.confidence_level;
-                
-                // תרגום הסיווגים לעברית פשוטה בשביל הבדיקה
-                let typeHebrew = "";
-                switch(state.predicted_friction_type) {
-                    case 'high_intent': typeHebrew = "בדרך לקנייה (בטוח בעצמו)"; break;
-                    case 'price_shock': typeHebrew = "מתלבט לגבי המחיר"; break;
-                    case 'security_distrust': typeHebrew = "חשדנות / חוסר ביטחון באתר"; break;
-                    case 'device_distraction': typeHebrew = "הסחת דעת (עזב את העכבר)"; break;
-                    default: typeHebrew = state.predicted_friction_type;
-                }
-                document.querySelector('#friction-type').textContent = typeHebrew;
+        const priceTag = document.querySelector('#product-price');
+        const scoreDisplay = document.querySelector('#score-val');
+        const confidenceDisplay = document.querySelector('#confidence-val');
+        const statusDisplay = document.querySelector('#behavior-status');
 
-                // אקשן אוטומטי לדוגמה: אם המשתמש ממש מהסס לגבי המחיר, נשנה את הכפתור
-                if (state.hesitation_score > 70 && state.predicted_friction_type === 'price_shock') {
-                    btn.style.backgroundColor = '#2ed573';
-                    btn.textContent = 'קנה עכשיו — קבל 3 תשלומים ללא ריבית!';
+        let dynamicDiscountApplied = false;
+
+        engine.onUpdate((metrics) => {
+            // Update the interface stats
+            scoreDisplay.textContent = metrics.score;
+            confidenceDisplay.textContent = metrics.confidence.toFixed(2);
+            statusDisplay.textContent = metrics.status;
+
+            // Change UI colors dynamically based on psychological severity
+            if (metrics.score < 25) {
+                statusDisplay.style.color = "#00ffcc"; // Green/Decisive
+                if (!dynamicDiscountApplied) {
+                    btn.style.backgroundColor = "#ff4757";
+                    btn.textContent = "BUY NOW";
+                    priceTag.textContent = "$350";
+                }
+            } else if (metrics.score >= 25 && metrics.score < 65) {
+                statusDisplay.style.color = "#ffdd57"; // Yellow/Browsing
+            } else {
+                statusDisplay.style.color = "#ff4757"; // Red/Hesitant
+                
+                // Real-time Conversion Hook: If user is highly hesitant and confidence is solid, change price
+                if (metrics.score >= 70 && metrics.confidence >= 0.50 && !dynamicDiscountApplied) {
+                    dynamicDiscountApplied = true;
+                    btn.style.backgroundColor = "#2ed573"; // Dynamic green offer hook
+                    btn.textContent = "ACTIVATE 15% OFF";
+                    priceTag.innerHTML = `<span style="text-decoration: line-through; color: #888; font-size: 20px;">$350</span> $297`;
                 }
             }
         });
-
-        // הפעלת המנוע
-        engine.start();
     </script>
 </body>
 </html>
